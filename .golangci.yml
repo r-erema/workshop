@@ -1,0 +1,64 @@
+version: "2"
+
+run:
+  timeout: 20m
+  modules-download-mode: readonly
+  allow-parallel-runners: true
+  allow-serial-runners: true
+linters:
+  default: all
+  disable:
+    - exhaustruct
+    - gomodguard
+    - wsl
+  settings:
+    staticcheck:
+      checks: ["-ST1001"]
+    goconst:
+      ignore-tests: true
+    varnamelen:
+      ignore-names:
+        - ok
+        - j
+        - tt
+        - ip
+        - fd
+      ignore-decls:
+        - i int
+        - k int
+        - m int
+        - n int
+        - wg sync.WaitGroup
+        - wg *sync.WaitGroup
+    revive:
+      rules:
+        - name: package-comments
+          disabled: true
+    funlen:
+      lines: 100
+    depguard:
+      rules:
+        main:
+          list-mode: lax
+          deny:
+            - pkg: "math/rand$"
+              desc: use math/rand/v2
+            - pkg: "github.com/sirupsen/logrus"
+              desc: not allowed
+            - pkg: "github.com/pkg/errors"
+              desc: Should be replaced by standard lib errors package
+  exclusions:
+    rules:
+      - path: '(.+)_test\.go'
+        linters:
+          - gochecknoglobals
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+    - golines
+  settings:
+    golines:
+      max-len: 120

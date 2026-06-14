@@ -16,7 +16,7 @@ jobs:
       - name: Run Test
         run: make test
         env:
-          GITHUB_ACTIONS: true
+          STEP_VARIABLE: STEP
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:

@@ -8,7 +8,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"testing"
 
@@ -40,10 +39,6 @@ var (
 )
 
 func TestMCPK8SIntegration(t *testing.T) {
-	if os.Getenv("GITHUB_ACTIONS") == "true" {
-		Skip("Skip in Github Actions")
-	}
-
 	t.Parallel()
 
 	RegisterFailHandler(Fail)
@@ -64,7 +59,7 @@ var _ = Describe("MCP K8S Interaction with LLM", func() {
 	)
 
 	BeforeEach(func() {
-		test.SkipInGitHubActions()
+		Skip("Skip in Github Actions")
 
 		ctx := GinkgoT().Context()
 
@@ -144,8 +139,6 @@ var _ = Describe("MCP K8S Interaction with LLM", func() {
 	})
 
 	It("should use LLM to list pods via MCP tool calling", func() {
-		test.SkipInGitHubActions()
-
 		ctx := GinkgoT().Context()
 
 		By("Sending prompt to LLM to trigger k8s_list_pods tool")

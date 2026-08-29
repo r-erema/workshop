@@ -1,0 +1,38 @@
+VAULT_ADDR=http://127.0.0.1:8200
+VAULT_TOKEN=***
+UNSEAL_KEY_1=***
+UNSEAL_KEY_2=***
+UNSEAL_KEY_3=***
+SSH_PRIVATE_KEY_FILE=~/.ssh/id_rsa
+SSH_PUBLIC_KEY_FILE=~/.ssh/id_rsa.pub
+
+init:
+	docker exec -e VAULT_ADDR=http://127.0.0.1:8200 vault vault operator init
+
+unseal:
+	docker exec -e VAULT_ADDR=http://127.0.0.1:8200 vault vault operator unseal ${UNSEAL_KEY_1}
+	docker exec -e VAULT_ADDR=http://127.0.0.1:8200 vault vault operator unseal ${UNSEAL_KEY_2}
+	docker exec -e VAULT_ADDR=http://127.0.0.1:8200 vault vault operator unseal ${UNSEAL_KEY_3}
+
+get-public-key:
+	ssh-keygen -y -f ${SSH_PRIVATE_KEY_FILE} > ${SSH_PUBLIC_KEY_FILE}
+
+save-snapshot:
+	docker exec -e VAULT_ADDR=${VAULT_ADDR} -e VAULT_TOKEN=${VAULT_TOKEN} \
+		vault vault operator raft snapshot save /tmp/vault-snapshot-tmp.snap
+
+copy-snapshot:
+	docker cp vault:/tmp/vault-snapshot-tmp.snap ./vault-snapshot-tmp.snap
+	docker exec vault rm /tmp/vault-snapshot-tmp.snap
+
+encrypt-snapshot:
+	age -R ${SSH_PUBLIC_KEY_FILE} -o ./vault-snapshot.snap ./vault-snapshot-tmp.snap
+
+decrypt-snapshot:
+	age -d -i ${SSH_PRIVATE_KEY_FILE} -o ./vault-snapshot-decrypted-tmp.snap ./vault-snapshot.snap
+	rm vault-snapshot.snap
+
+restore-snapshot:
+	docker cp ./vault-snapshot-decrypted-tmp.snap vault:/tmp/vault-snapshot-restore.snap
+	docker exec -e VAULT_ADDR=${VAULT_ADDR} -e VAULT_TOKEN=${VAULT_TOKEN} \
+		vault vault operator raft snapshot restore -force /tmp/vault-snapshot-restore.snap

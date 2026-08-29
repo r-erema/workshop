@@ -1,0 +1,13 @@
+services:
+  vault:
+    image: hashicorp/vault:2.0.4
+    container_name: vault
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8200:8200"
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./config:/vault/config:ro
+      - ./data:/vault/data
+    command: vault server -config=/vault/config/vault.hcl

@@ -1,4 +1,4 @@
-GOLANGCI_IMAGE=golangci/golangci-lint:v2.12.2
+GOLANGCI_IMAGE=golangci/golangci-lint:v2.13.2
 
 CSR_CONF_PATH=./configs/csr.conf
 CA_CERT_PATH=./assets/rootCA.crt
@@ -10,7 +10,7 @@ CERT_PATH=./assets/common_cert_for_all.crt
 before-commit:
 	sudo -S $(MAKE) test
 	$(MAKE) lint
-	sudo .bin/github/act -P ubuntu-latest=-self-hosted --var GITHUB_ACTIONS=true
+	sudo .bin/github/act-v0.2.89 -P ubuntu-latest=-self-hosted --var GITHUB_ACTIONS=true
 
 test:
 	go test -exec sudo -race -cover -coverprofile=coverage.txt -covermode=atomic ./...
